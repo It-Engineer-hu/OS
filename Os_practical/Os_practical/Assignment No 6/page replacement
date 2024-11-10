@@ -13,94 +13,102 @@ void getData() {
 
 void initialize() {
     pgfaultcnt = 0;
-    for(int i = 0; i < nf; i++) p[i] = 9999;
+    for(int i = 0; i < nf; i++) p[i] = 9999;  // Initialize frames with a large number to signify empty frames
 }
 
 int isHit(int data) {
-    for(int j = 0; j < nf; j++) if(p[j] == data) return 1;
-    return 0;
+    for(int j = 0; j < nf; j++) if(p[j] == data) return 1;  // Check if the page is already in memory (hit)
+    return 0;  // Return 0 if the page is not in memory (miss)
 }
 
 void dispPages() {
-    for(int k = 0; k < nf; k++) if(p[k] != 9999) printf(" %d", p[k]);
+    printf("Frames: ");
+    for(int k = 0; k < nf; k++) {
+        if(p[k] != 9999) // Skip empty frames
+            printf("%d ", p[k]);
+    }
+    printf("\n");
 }
 
 void dispPgFaultCnt() {
-    printf("\nTotal page faults: %d", pgfaultcnt);
+    printf("\nTotal page faults: %d\n", pgfaultcnt);
 }
 
 void fifo() {
     initialize();
+    printf("\nFIFO Algorithm:\n");
     for(int i = 0; i < n; i++) {
-        if(!isHit(in[i])) {
-            for(int k = 0; k < nf - 1; k++) p[k] = p[k + 1];
-            p[nf - 1] = in[i];
+        if(!isHit(in[i])) {  // If it's a page fault
+            for(int k = 0; k < nf - 1; k++) p[k] = p[k + 1];  // Shift frames left
+            p[nf - 1] = in[i];  // Add the new page in the last frame
             pgfaultcnt++;
-            dispPages();
+            dispPages();  // Display current frames
         }
     }
-    dispPgFaultCnt(); // Move this line outside the for loop
+    dispPgFaultCnt(); // Display total page faults
 }
 
 void optimal() {
     initialize();
     int near[50];
+    printf("\nOptimal Algorithm:\n");
     for(int i = 0; i < n; i++) {
-        if(!isHit(in[i])) {
+        if(!isHit(in[i])) {  // If it's a page fault
             for(int j = 0; j < nf; j++) {
                 int pg = p[j], found = 0;
-                for(int k = i; k < n; k++) {
+                for(int k = i; k < n; k++) {  // Look for future usage of the page
                     if(pg == in[k]) { near[j] = k; found = 1; break; }
                 }
-                if(!found) near[j] = 9999;
+                if(!found) near[j] = 9999;  // If the page is never used again, mark it with 9999
             }
             int max = -9999, repindex = 0;
-            for(int j = 0; j < nf; j++) {
+            for(int j = 0; j < nf; j++) {  // Find the page that is not used for the longest time
                 if(near[j] > max) { max = near[j]; repindex = j; }
             }
-            p[repindex] = in[i];
+            p[repindex] = in[i];  // Replace the page
             pgfaultcnt++;
-            dispPages();
+            dispPages();  // Display current frames
         }
     }
-    dispPgFaultCnt(); // Move this line outside the for loop
+    dispPgFaultCnt(); // Display total page faults
 }
 
 void lru() {
     initialize();
     int least[50];
+    printf("\nLRU Algorithm:\n");
     for(int i = 0; i < n; i++) {
-        if(!isHit(in[i])) {
+        if(!isHit(in[i])) {  // If it's a page fault
             for(int j = 0; j < nf; j++) {
                 int pg = p[j], found = 0;
-                for(int k = i - 1; k >= 0; k--) {
+                for(int k = i - 1; k >= 0; k--) {  // Look for the most recent use of the page
                     if(pg == in[k]) { least[j] = k; found = 1; break; }
                 }
-                if(!found) least[j] = -9999;
+                if(!found) least[j] = -9999;  // If the page was never used, mark it with -9999
             }
             int min = 9999, repindex = 0;
-            for(int j = 0; j < nf; j++) {
+            for(int j = 0; j < nf; j++) {  // Find the page that was used least recently
                 if(least[j] < min) { min = least[j]; repindex = j; }
             }
-            p[repindex] = in[i];
+            p[repindex] = in[i];  // Replace the page
             pgfaultcnt++;
-            dispPages();
+            dispPages();  // Display current frames
         }
     }
-    dispPgFaultCnt(); // Move this line outside the for loop
+    dispPgFaultCnt(); // Display total page faults
 }
 
 int main() {
     int choice;
     while(1) {
-        printf("\nPage Replacement Algorithms\n1.Enter data\n2.FIFO\n3.Optimal\n4.LRU\n5.Exit\nEnter your choice: ");
+        printf("\nPage Replacement Algorithms\n1. Enter data\n2. FIFO\n3. Optimal\n4. LRU\n5. Exit\nEnter your choice: ");
         scanf("%d", &choice);
         switch(choice) {
             case 1: getData(); break;
             case 2: fifo(); break;
             case 3: optimal(); break;
             case 4: lru(); break;
-            default: return 0;
+            default: return 0;  // Exit the program
         }
     }
 }
