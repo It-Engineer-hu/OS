@@ -1,0 +1,267 @@
+Addbook1.sh
+
+temp=1
+
+while [ "$temp" -lt 6 ]; do
+	echo -e "Choose one of the following\n1. Create a new Address Book\n2. View Records\n3. Insert new Record\n4. Modify Record\n5. Delete Record\n6. Exit"
+	read opt
+
+	case $opt in
+    	1)  
+        	echo "Enter Filename:"
+        	read filename
+        	if [ -e "$filename" ]; then
+            	rm "$filename"
+            	echo "Existing file removed."
+        	fi
+        	echo -e "Name\tNumber\t\tAddress\n-----------------------------" > "$filename"
+        	echo "Enter records. Type 'q' to stop."
+
+        	while true; do
+            	echo -e "\nEnter Name:"
+            	read name
+            	if [ "$name" == "q" ]; then
+                	break
+            	fi
+            	echo -e "Enter Phone Number of $name:"
+            	read number
+            	echo -e "Enter Address of $name:"
+            	read address
+            	echo -e "$name\t$number\t$address" >> "$filename"
+            	echo "Record added."
+        	done
+        	;;
+
+    	2)  
+        	if [ -z "$filename" ]; then
+            	echo "No address book file specified."
+        	elif [ -e "$filename" ]; then
+            	cat "$filename"
+        	else
+            	echo "Address book file does not exist."
+        	fi
+        	;;
+
+    	3)  
+        	if [ -z "$filename" ]; then
+            	echo "No address book file specified."
+        	elif [ ! -e "$filename" ]; then
+            	echo "Address book file does not exist."
+        	else
+            	echo -e "\nEnter Name:"
+            	read name
+            	echo -e "Enter Phone Number of $name:"
+            	read number
+            	echo -e "Enter Address of $name:"
+            	read address
+            	echo -e "$name\t$number\t$address" >> "$filename"
+            	echo "Record inserted."
+        	fi
+        	;;
+
+    	4)  
+        	if [ -z "$filename" ]; then
+            	echo "No address book file specified."
+        	elif [ ! -e "$filename" ]; then
+            	echo "Address book file does not exist."
+        	else
+            	echo -e "Enter the name of the record to modify:"
+            	read old_name
+
+            	temp_file=$(mktemp)
+            	awk -v name="$old_name" '
+                	BEGIN {FS="\t"; OFS="\t"}
+                	$1 != name {print}
+            	' "$filename" > "$temp_file"
+
+            	echo -e "\nEnter new Name:"
+            	read new_name
+            	echo -e "Enter new Phone Number of $new_name:"
+            	read number
+            	echo -e "Enter new Address of $new_name:"
+            	read address
+            	echo -e "$new_name\t$number\t$address" >> "$temp_file"
+            	mv "$temp_file" "$filename"
+            	echo "Record modified."
+        	fi
+        	;;
+
+    	5)  # Delete a Record
+        	if [ -z "$filename" ]; then
+            	echo "No address book file specified."
+        	elif [ ! -e "$filename" ]; then
+            	echo "Address book file does not exist."
+        	else
+            	echo -e "Enter the name of the record to delete:"
+            	read name
+
+            	temp_file=$(mktemp)
+            	awk -v name="$name" '
+                	BEGIN {FS="\t"; OFS="\t"}
+                	$1 != name {print}
+            	' "$filename" > "$temp_file"
+            	mv "$temp_file" "$filename"
+            	echo "Record deleted if it existed."
+        	fi
+        	;;
+
+    	6)
+        	exit 0
+        	;;
+
+    	*)
+        	echo "Invalid option. Please try again."
+        	;;
+	esac
+done
+
+OUTPUT :- 
+
+(base) pl-lab@pllab-desktop:~/OS$ gedit Addbook1.sh
+(base) pl-lab@pllab-desktop:~/OS$ chmod +x Addbook1.sh
+(base) pl-lab@pllab-desktop:~/OS$ ./Addbook1.sh
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+1
+Enter Filename:
+Family
+Enter records. Type 'q' to stop.
+
+Enter Name:
+Samruddhi
+Enter Phone Number of Samruddhi:
+4532178594
+Enter Address of Samruddhi:
+ABC
+Record added.
+
+Enter Name:
+Tejas
+Enter Phone Number of Tejas:
+85730837382
+Enter Address of Tejas:
+YUSHSE
+Record added.
+
+Enter Name:
+q
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+2
+Name	Number    	Address
+-----------------------------
+Samruddhi	4532178594	ABC
+Tejas	85730837382	YUSHSE
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+3
+
+Enter Name:
+Anushri
+Enter Phone Number of Anushri:
+5647839202
+Enter Address of Anushri:
+hdhiHJHDHI
+Record inserted.
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+4
+Enter the name of the record to modify:
+Anushri
+
+Enter new Name:
+Yogeshwari
+Enter new Phone Number of Yogeshwari:
+2345678901
+Enter new Address of Yogeshwari:
+HJSGD
+Record modified.
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+2
+Name	Number    	Address
+-----------------------------
+Samruddhi	4532178594	ABC
+Tejas	85730837382	YUSHSE
+Yogeshwari	2345678901	HJSGD
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+5
+Enter the name of the record to delete:
+Tejs
+Record deleted if it existed.
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+2
+Name	Number    	Address
+-----------------------------
+Samruddhi	4532178594	ABC
+Tejas	85730837382	YUSHSE
+Yogeshwari	2345678901	HJSGD
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+5
+Enter the name of the record to delete:
+Tejas
+Record deleted if it existed.
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+2
+Name	Number    	Address
+-----------------------------
+Samruddhi	4532178594	ABC
+Yogeshwari	2345678901	HJSGD
+Choose one of the following
+1. Create a new Address Book
+2. View Records
+3. Insert new Record
+4. Modify Record
+5. Delete Record
+6. Exit
+6
+(base) pl-lab@pllab-desktop:~/OS$
